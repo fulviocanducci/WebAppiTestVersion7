@@ -23,7 +23,7 @@ namespace WebAppiTest.Controllers
             {
                 return NotFound();
             }
-            return await _context.Posts.ToListAsync();
+            return await _context.Posts.OrderBy(o=>o.Description).ToListAsync();
         }
 
         // GET: api/Posts/5
