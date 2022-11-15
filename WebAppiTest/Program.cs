@@ -16,13 +16,10 @@ builder.Services.Configure<RouteOptions>(config =>
     config.LowercaseUrls = true;
 });
 var app = builder.Build();
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseCors(config => config.AllowAnyHeader().AllowAnyOrigin().WithMethods("PUT", "DELETE", "GET", "POST"));
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
