@@ -18,7 +18,7 @@ builder.Services.Configure<RouteOptions>(config =>
 var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseCors(config => config.AllowAnyHeader().AllowAnyOrigin().WithMethods("PUT", "DELETE", "GET", "POST"));
+app.UseCors(config => config.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod().WithMethods("PUT", "DELETE", "GET", "POST"));
 //app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
