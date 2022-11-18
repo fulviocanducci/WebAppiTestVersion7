@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Canducci.Pagination;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Mime;
 using WebAppiTest.Models;
-
 namespace WebAppiTest.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces(MediaTypeNames.Application.Json)]
     public class PostsController : ControllerBase
     {
         private readonly MyDataBaseContext _context;
@@ -15,19 +17,32 @@ namespace WebAppiTest.Controllers
             _context = context;
         }
 
-        // GET: api/Posts
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<Posts>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<Posts>>> GetPosts()
         {
             if (_context.Posts == null)
             {
                 return NotFound();
             }
-            return await _context.Posts.OrderBy(o=>o.Description).ToListAsync();
+            return await _context.Posts.OrderBy(o => o.Description).ToListAsync();
         }
 
-        // GET: api/Posts/5
+        [HttpGet("[controller]/pages/{page?}/{total?}")]
+        [ProducesResponseType(typeof(PaginatedRest<Posts>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<PaginatedRest<Posts>>> GetPagePosts(int? page = 1, int? total = 10)
+        {
+            if (_context.Posts == null)
+            {
+                return NotFound();
+            }
+            return await _context.Posts.OrderBy(o => o.Description).ToPaginatedRestAsync(page ?? 1, total ?? 10);
+        }
+
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(Posts), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]        
         public async Task<ActionResult<Posts>> GetPosts(Guid id)
         {
             if (_context.Posts == null)
@@ -44,9 +59,8 @@ namespace WebAppiTest.Controllers
             return posts;
         }
 
-        // PUT: api/Posts/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [ProducesResponseType(typeof(Posts), StatusCodes.Status204NoContent)]
         public async Task<IActionResult> PutPosts(Guid id, Posts posts)
         {
             if (id != posts.Id)
@@ -75,9 +89,9 @@ namespace WebAppiTest.Controllers
             return NoContent();
         }
 
-        // POST: api/Posts
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [ProducesResponseType(typeof(Posts), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(Posts), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<Posts>> PostPosts(Posts posts)
         {
             if (_context.Posts == null)
@@ -90,8 +104,9 @@ namespace WebAppiTest.Controllers
             return CreatedAtAction("GetPosts", new { id = posts.Id }, posts);
         }
 
-        // DELETE: api/Posts/5
         [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(Posts), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(Posts), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeletePosts(Guid id)
         {
             if (_context.Posts == null)
